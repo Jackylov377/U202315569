@@ -1,0 +1,35 @@
+# 定义参数
+$endpoint = "http://127.0.0.1:9000"
+$accessKey = "admin"
+$accessSecret = "admin123"
+$bucket = "test"
+$numSamples = 500
+$objectSize = 1048576  # 1MB
+
+# 并发数列表
+$clients = @(1, 5, 10, 20, 50, 100)
+
+# 创建结果目录
+$resultDir = "s3bench_results"
+if (-not (Test-Path $resultDir)) {
+    New-Item -ItemType Directory -Path $resultDir | Out-Null
+}
+
+# 循环执行测试
+foreach ($c in $clients) {
+    Write-Host "Running s3bench with $c clients..."
+    $resultFile = "$resultDir\result_clients_${c}.txt"
+    
+    s3bench -endpoint $endpoint `
+            -accessKey $accessKey `
+            -accessSecret $accessSecret `
+            -bucket $bucket `
+            -numClients $c `
+            -numSamples $numSamples `
+            -objectSize $objectSize `
+            > $resultFile
+    
+    Write-Host "Result saved to $resultFile"
+}
+
+Write-Host "All tests completed. Results are in $resultDir folder."
